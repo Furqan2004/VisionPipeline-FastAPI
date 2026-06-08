@@ -5,6 +5,9 @@ import shutil
 import uuid
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from fastapi.responses import FileResponse, JSONResponse
+from app.predictors.yolo_predictor import YOLOPredictor
+from app.predictors.sam_predictor import SAM2Predictor
+from app.predictors.classifier import EfficientNetClassifier
 from app.api.dependencies import get_models
 from app.core.config import settings
 from app.core.logger_utils import CustomLogger
