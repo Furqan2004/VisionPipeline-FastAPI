@@ -9,10 +9,13 @@ from app.api.dependencies import get_models
 from app.core.config import settings
 from app.core.logger_utils import CustomLogger
 
+from typing import List, Tuple, Dict, Any
+from app.models.response import HealthStatus, ImageResponse
+
 router = APIRouter()
 logger = CustomLogger("api")
 
-def apply_segmentation(frame, mask, bbox, color=(255, 120, 30)):
+def apply_segmentation(frame: np.ndarray, mask: np.ndarray, bbox: List[int], color: Tuple[int, int, int] = (255, 120, 30)) -> np.ndarray:
     x1, y1, x2, y2 = bbox
     h_crop, w_crop = mask.shape
     roi = frame[y1:y1+h_crop, x1:x1+w_crop]
@@ -25,8 +28,8 @@ def apply_segmentation(frame, mask, bbox, color=(255, 120, 30)):
     frame[y1:y1+h_crop, x1:x1+w_crop] = overlay
     return frame
 
-@router.get("/health")
-async def health_check(models=Depends(get_models)):
+@router.get("/health", response_model=HealthStatus)
+async def health_check(models: Tuple[YOLOPredictor, SAM2Predictor, EfficientNetClassifier] = Depends(get_models)) -> Dict[str, Any]:
     yolo, sam, classifier = models
     return {
         "status": "healthy",
@@ -37,8 +40,8 @@ async def health_check(models=Depends(get_models)):
         }
     }
 
-@router.post("/predict-image")
-async def predict_image(file: UploadFile = File(...), models=Depends(get_models)):
+@router.post("/predict-image", response_model=ImageResponse)
+async def predict_image(file: UploadFile = File(...), models: Tuple[YOLOPredictor, SAM2Predictor, EfficientNetClassifier] = Depends(get_models)) -> Dict[str, Any]:
     yolo, sam, classifier = models
     contents = await file.read()
     nparr = np.frombuffer(contents, np.uint8)

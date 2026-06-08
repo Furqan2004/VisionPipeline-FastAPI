@@ -1,25 +1,26 @@
 import torch
 import numpy as np
+from typing import Union, List, Any
 from PIL import Image
 from sam2.build_sam import build_sam2
 from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 from app.core.logger_utils import CustomLogger
 
 class SAM2Predictor:
-    def __init__(self, config_file, ckpt_path):
-        self.logger = CustomLogger("sam_predictor")
-        self.config_file = config_file
-        self.ckpt_path = ckpt_path
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+    def __init__(self, config_file: str, ckpt_path: str) -> None:
+        self.logger: CustomLogger = CustomLogger("sam_predictor")
+        self.config_file: str = config_file
+        self.ckpt_path: str = ckpt_path
+        self.device: str = "cuda" if torch.cuda.is_available() else "cpu"
         
         self.logger.info(f"Initializing SAM2 on device: {self.device}")
         try:
-            self.model = build_sam2(
+            self.model: Any = build_sam2(
                 config_file = self.config_file,
                 ckpt_path   = self.ckpt_path,
                 device      = self.device,
             )
-            self.mask_generator = SAM2AutomaticMaskGenerator(
+            self.mask_generator: SAM2AutomaticMaskGenerator = SAM2AutomaticMaskGenerator(
                 model                  = self.model,
                 points_per_side        = 32,
                 pred_iou_thresh        = 0.85,
@@ -31,7 +32,7 @@ class SAM2Predictor:
             self.logger.error(f"Failed to initialize SAM2: {e}")
             raise
 
-    def get_head_segmentation(self, image_input):
+    def get_head_segmentation(self, image_input: Union[str, np.ndarray]) -> np.ndarray:
         try:
             if isinstance(image_input, str):
                 image = Image.open(image_input).convert("RGB")

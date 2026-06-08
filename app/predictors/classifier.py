@@ -1,17 +1,19 @@
 import torch
+import numpy as np
+from typing import Union, Any
 from torchvision import transforms
 from PIL import Image
 import os
 from app.core.logger_utils import CustomLogger
 
 class EfficientNetClassifier:
-    def __init__(self, model_path: str, image_size: int, threshold: float):
-        self.logger = CustomLogger("classifier")
-        self.threshold  = threshold
-        self.image_size = image_size
-        self.device     = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    def __init__(self, model_path: str, image_size: int, threshold: float) -> None:
+        self.logger: CustomLogger = CustomLogger("classifier")
+        self.threshold: float = threshold
+        self.image_size: int = image_size
+        self.device: torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.transform = transforms.Compose([
+        self.transform: Any = transforms.Compose([
             transforms.Resize((self.image_size, self.image_size)),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
@@ -19,7 +21,7 @@ class EfficientNetClassifier:
 
         try:
             if os.path.exists(model_path):
-                self.model = torch.jit.load(model_path, map_location=self.device)
+                self.model: Any = torch.jit.load(model_path, map_location=self.device)
                 self.model.to(self.device)
                 self.model.eval()
                 self.logger.info("Classifier model loaded.")
@@ -30,7 +32,7 @@ class EfficientNetClassifier:
             self.logger.error(f"Failed to load classifier: {e}")
             self.model = None
 
-    def predict(self, image_input) -> int:
+    def predict(self, image_input: Union[str, np.ndarray, Image.Image]) -> int:
         if self.model is None: return -1
         try:
             if isinstance(image_input, str):
