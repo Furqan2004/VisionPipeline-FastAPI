@@ -1,0 +1,13 @@
+{
+    "yolo_model_name": "weights/best.pt",
+    "sam_config_file": "configs/sam2.1/sam2.1_hiera_l.yaml",
+    "sam_ckpt_path": "weights/sam2.1_hiera_large.pt",
+    "model_path": "weights/efficientnet_b3_traced.pt",
+    "image_size": 300,
+    "threshold": 0.5,
+    "video_config": {
+        "frame_interval": 5,
+        "use_threading": false
+    },
+    "output_dir": "output"
+}
